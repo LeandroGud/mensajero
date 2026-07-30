@@ -64,19 +64,19 @@
       //  Así una sola palabra se ve enorme y una frase larga se ve más pequeña,
       //  siempre legible. Es más preciso que un clamp() fijo por caracteres.
       // ----------------------------------------------------------------------
-      // Tope máximo del tamaño de fuente, como fracción del alto de la pantalla.
-      // Evita que un texto corto (1-2 letras) crezca hasta llenar todo.
-      // Súbelo para textos más grandes, bájalo para más pequeños.
-      const MAX_ALTO = 0.45; // ≈ 45 % del alto de la pantalla
+      // Tamaño máximo de la fuente, en PÍXELES fijos (no un % de la pantalla).
+      // Un texto corto llegará hasta este tamaño y no crecerá más.
+      // ¿Quieres la letra más grande o más chica? Cambia solo este número.
+      const MAX_PX = 160;
 
       function ajustarTamano() {
         // Espacio disponible (dejamos un pequeño margen de seguridad).
-        const dispAncho = contenedor.clientWidth * 0.9;
-        const dispAlto = contenedor.clientHeight * 0.9;
+        const dispAncho = contenedor.clientWidth * 0.92;
+        const dispAlto = contenedor.clientHeight * 0.92;
 
         // Límites de tamaño de fuente en píxeles.
         const MIN = 24;
-        const MAX = Math.round(window.innerHeight * MAX_ALTO);
+        const MAX = MAX_PX;
 
         // Búsqueda binaria del mayor tamaño que aún cabe: rápida y estable.
         let bajo = MIN;
