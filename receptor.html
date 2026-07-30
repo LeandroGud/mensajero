@@ -66,12 +66,12 @@
       // ----------------------------------------------------------------------
       function ajustarTamano() {
         // Espacio disponible (dejamos un pequeño margen de seguridad).
-        const dispAncho = contenedor.clientWidth * 0.92;
-        const dispAlto = contenedor.clientHeight * 0.92;
+        const dispAncho = contenedor.clientWidth * 0.95;
+        const dispAlto = contenedor.clientHeight * 0.95;
 
         // Límites de tamaño de fuente en píxeles.
         const MIN = 24;
-        const MAX = Math.round(window.innerHeight * 0.9);
+        const MAX = Math.round(window.innerHeight * 0.95);
 
         // Búsqueda binaria del mayor tamaño que aún cabe: rápida y estable.
         let bajo = MIN;
@@ -137,6 +137,17 @@
           ajustarTamano();
         }
       });
+
+      // La fuente Inter se carga de forma asíncrona. Si medimos antes de que
+      // esté lista, el tamaño queda desfasado; recalculamos cuando termine.
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+          if (!elMensaje.classList.contains("esperando")) {
+            elMensaje.style.fontSize = "";
+            ajustarTamano();
+          }
+        });
+      }
 
       // ----------------------------------------------------------------------
       //  Botón de pantalla completa.

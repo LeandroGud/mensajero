@@ -48,95 +48,132 @@ body {
   position: fixed;
   inset: 0;
   z-index: 999;
-  background: var(--bg);
+  background: radial-gradient(
+      1200px 600px at 50% -10%,
+      rgba(79, 140, 255, 0.12),
+      transparent 60%
+    ),
+    var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: env(safe-area-inset-top, 0) 1.25rem env(safe-area-inset-bottom, 0);
+  overflow: auto;
 }
 
 .pin-caja {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.6rem;
   text-align: center;
-  max-width: 320px;
   width: 100%;
+  max-width: 340px;
+  padding: 2.25rem 1.75rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--borde);
+  border-radius: 22px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
 }
 
 .pin-caja__icono {
-  font-size: 2.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 66px;
+  height: 66px;
+  font-size: 1.9rem;
   line-height: 1;
+  background: var(--bg-elev);
+  border: 1px solid var(--borde);
+  border-radius: 50%;
 }
 
 .pin-caja__titulo {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--texto);
+  margin-bottom: -0.9rem;
 }
 
 .pin-caja__subtitulo {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   color: var(--texto-suave);
-  margin-top: -1rem;
 }
 
 /* Puntitos que representan los dígitos ingresados */
 .pin-puntos {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.9rem;
   justify-content: center;
 }
 
 .pin-punto {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
   border: 2px solid var(--borde);
   background: transparent;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .pin-punto.activo {
   background: var(--acento);
   border-color: var(--acento);
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.18);
 }
 
 /* Teclado numérico */
 .pin-teclado {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.6rem;
+  gap: 0.85rem;
   width: 100%;
+  max-width: 280px;
 }
 
 .pin-tecla {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: inherit;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 600;
-  padding: 1rem;
-  background: var(--bg-panel);
+  background: var(--bg-elev);
   border: 1px solid var(--borde);
-  border-radius: 12px;
+  border-radius: 50%;
   color: var(--texto);
   cursor: pointer;
-  transition: background 0.12s ease, transform 0.08s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s ease, transform 0.08s ease,
+    border-color 0.12s ease;
   user-select: none;
 }
 
 .pin-tecla:hover {
-  background: var(--bg-elev);
+  background: #262b36;
+  border-color: var(--acento);
 }
 
 .pin-tecla:active {
-  transform: scale(0.93);
-  background: var(--bg-elev);
+  transform: scale(0.9);
+  background: var(--acento);
+  border-color: var(--acento);
 }
 
 .pin-tecla--borrar {
-  font-size: 1rem;
+  font-size: 1.3rem;
   color: var(--texto-suave);
+  background: transparent;
+  border-color: transparent;
+}
+.pin-tecla--borrar:hover {
+  background: var(--bg-elev);
+  border-color: var(--borde);
 }
 
 /* Mensaje de error */
@@ -158,6 +195,31 @@ body {
 
 .pin-puntos.shake {
   animation: shake 0.4s ease;
+}
+
+/* -------- Botón de cerrar sesión (en la página de elección) -------- */
+.inicio__logout {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--texto-suave);
+  background: var(--bg-panel);
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  padding: 0.5rem 0.95rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.inicio__logout:hover {
+  color: var(--texto);
+  border-color: var(--error);
+  background: var(--bg-elev);
 }
 
 /* ==========================================================================
@@ -400,8 +462,10 @@ body {
 }
 
 .receptor__texto {
-  width: 100%;
-  max-width: 95vw;
+  /* inline-block: el elemento se ajusta al ancho real del texto, no al 100%.
+     Así el auto-ajuste por JS puede medir correctamente y agrandar la fuente. */
+  display: inline-block;
+  max-width: 94vw;
   /* El tamaño base lo ajusta el JS; clamp() sirve de respaldo. */
   font-size: clamp(2rem, 12vw, 16rem);
   font-weight: 700;
@@ -410,7 +474,7 @@ body {
   word-break: break-word;
   overflow-wrap: break-word;
   white-space: pre-wrap;
-  transition: font-size 0.15s ease;
+  transition: font-size 0.1s ease;
 }
 
 /* Estado de espera (sin mensaje) */

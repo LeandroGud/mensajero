@@ -51,6 +51,11 @@
 
     <!-- ==================== Contenido principal (oculto hasta PIN correcto) ==================== -->
     <main id="contenidoPrincipal" class="inicio" style="display:none">
+      <!-- Botón para cerrar sesión y volver a la pantalla del PIN -->
+      <button id="btnLogout" class="inicio__logout" type="button">
+        🔒 Cerrar sesión
+      </button>
+
       <h1 class="inicio__titulo">Mensajero</h1>
       <p class="inicio__subtitulo">
         Escribe en un dispositivo y muéstralo en grande en otro, en tiempo real.
@@ -163,6 +168,18 @@
           errorEl.textContent = "";
           actualizarPuntos();
         }
+      });
+
+      // -----------------------------------------------------------------------
+      //  Cerrar sesión: borra la marca de autenticación y vuelve a pedir el PIN.
+      // -----------------------------------------------------------------------
+      document.getElementById("btnLogout").addEventListener("click", () => {
+        sessionStorage.removeItem("msg_auth");
+        entrada = "";
+        actualizarPuntos();
+        errorEl.textContent = "";
+        contenido.style.display = "none";
+        overlay.style.display = "";
       });
     </script>
   </body>
