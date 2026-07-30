@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mensajero — Emisor</title>
+
+    <!-- Tipografía Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="emisor">
+      <!-- Barra superior: volver, título e indicador de conexión -->
+      <header class="barra">
+        <div class="barra__titulo">
+          <a class="barra__volver" href="index.html" title="Volver">←</a>
+          <span>✍️ Emisor</span>
+        </div>
+
+        <!-- Indicador de conexión a Firebase -->
+        <span id="estado" class="estado desconectado">
+          <span class="estado__punto"></span>
+          <span id="estadoTexto">Conectando…</span>
+        </span>
+      </header>
+
+      <!-- Cuerpo: campo de texto y controles -->
+      <main class="emisor__cuerpo">
+        <textarea
+          id="texto"
+          class="emisor__textarea"
+          placeholder="Escribe aquí… se mostrará al instante en el receptor."
+          autofocus
+        ></textarea>
+
+        <div class="emisor__pie">
+          <span id="contador" class="contador">0 caracteres</span>
+          <button id="btnLimpiar" class="boton boton--peligro" type="button">
+            Limpiar
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <!-- ================== Lógica del Emisor (Firebase v9 modular) ================== -->
+    <script type="module">
+      // Importamos el SDK de Firebase v9+ (modular) desde el CDN oficial.
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        set,
+        onValue,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+      // Configuración y ruta (tus credenciales van en firebase-config.js).
+      import { firebaseConfig, RUTA_MENSAJE } from "./firebase-config.js";
+
+      // --- Inicialización de Firebase ---
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+      const refMensaje = ref(db, RUTA_MENSAJE);
+
+      // --- Referencias al DOM ---
+      const textarea = document.getElementById("texto");
+      const contador = document.getElementById("contador");
+      const btnLimpiar = document.getElementById("btnLimpiar");
+      const estado = document.getElementById("estado");
+      const estadoTexto = document.getElementById("estadoTexto");
+
+      // ----------------------------------------------------------------------
+      //  Indicador de conexión
+      //  Firebase expone la ruta especial "/.info/connected" que vale true/false
+      //  según haya conexión con el servidor de Realtime Database.
+      // ----------------------------------------------------------------------
+      const refConexion = ref(db, ".info/connected");
+      onValue(refConexion, (snap) => {
+        const conectado = snap.val() === true;
+        estado.classList.toggle("conectado", conectado);
+        estado.classList.toggle("desconectado", !conectado);
+        estadoTexto.textContent = conectado ? "Conectado" : "Desconectado";
+      });
+
+      // ----------------------------------------------------------------------
+      //  Escritura en tiempo real con debounce
+      //  Cada vez que el usuario escribe (evento "input") esperamos ~180ms de
+      //  inactividad antes de subir el texto, para no saturar de escrituras.
+      // ----------------------------------------------------------------------
+      const DEBOUNCE_MS = 180;
+      let temporizador = null;
+
+      function actualizarContador() {
+        const n = textarea.value.length;
+        contador.textContent = `${n} ${n === 1 ? "caracter" : "caracteres"}`;
+      }
+
+      function subirTexto(valor) {
+        // set() sobrescribe el valor en la ruta. Si algo falla (reglas, red),
+        // lo registramos en consola sin romper la escritura del usuario.
+        set(refMensaje, valor).catch((err) => {
+          console.error("Error al subir el texto a Firebase:", err);
+        });
+      }
+
+      textarea.addEventListener("input", () => {
+        actualizarContador();
+        clearTimeout(temporizador);
+        temporizador = setTimeout(() => {
+          subirTexto(textarea.value);
+        }, DEBOUNCE_MS);
+      });
+
+      // ----------------------------------------------------------------------
+      //  Botón "Limpiar": borra el texto local y en Firebase (inmediatamente).
+      // ----------------------------------------------------------------------
+      btnLimpiar.addEventListener("click", () => {
+        clearTimeout(temporizador); // cancela cualquier subida pendiente
+        textarea.value = "";
+        actualizarContador();
+        subirTexto(""); // borra también en la base de datos
+        textarea.focus();
+      });
+
+      // ----------------------------------------------------------------------
+      //  Al abrir el emisor, cargamos el último mensaje guardado (solo una vez)
+      //  para poder seguir editándolo, y luego dejamos de escuchar.
+      // ----------------------------------------------------------------------
+      onValue(
+        refMensaje,
+        (snap) => {
+          const valor = snap.val();
+          if (typeof valor === "string" && textarea.value === "") {
+            textarea.value = valor;
+            actualizarContador();
+          }
+        },
+        { onlyOnce: true }
+      );
+
+      // Estado inicial del contador.
+      actualizarContador();
+    </script>
+  </body>
+</html>

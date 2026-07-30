@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mensajero — Receptor</title>
+
+    <!-- Tipografía Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="receptor">
+      <!-- Aquí se muestra el mensaje en grande -->
+      <div id="mensaje" class="receptor__texto esperando">
+        Esperando mensaje…
+      </div>
+    </main>
+
+    <!-- Botón discreto para entrar en pantalla completa -->
+    <button id="btnFullscreen" class="receptor__fs" type="button">
+      ⛶ Pantalla completa
+    </button>
+
+    <!-- ================== Lógica del Receptor (Firebase v9 modular) ================== -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        onValue,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+      import { firebaseConfig, RUTA_MENSAJE } from "./firebase-config.js";
+
+      // --- Inicialización de Firebase ---
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+      const refMensaje = ref(db, RUTA_MENSAJE);
+
+      // --- Referencias al DOM ---
+      const contenedor = document.querySelector(".receptor");
+      const elMensaje = document.getElementById("mensaje");
+      const btnFullscreen = document.getElementById("btnFullscreen");
+
+      const TEXTO_ESPERA = "Esperando mensaje…";
+
+      // ----------------------------------------------------------------------
+      //  Ajuste automático del tamaño de fuente.
+      //  Estrategia: partimos de un tamaño grande y lo reducimos hasta que el
+      //  texto quepa dentro del contenedor (sin desbordar en alto ni ancho).
+      //  Así una sola palabra se ve enorme y una frase larga se ve más pequeña,
+      //  siempre legible. Es más preciso que un clamp() fijo por caracteres.
+      // ----------------------------------------------------------------------
+      function ajustarTamano() {
+        // Espacio disponible (dejamos un pequeño margen de seguridad).
+        const dispAncho = contenedor.clientWidth * 0.92;
+        const dispAlto = contenedor.clientHeight * 0.92;
+
+        // Límites de tamaño de fuente en píxeles.
+        const MIN = 24;
+        const MAX = Math.round(window.innerHeight * 0.9);
+
+        // Búsqueda binaria del mayor tamaño que aún cabe: rápida y estable.
+        let bajo = MIN;
+        let alto = MAX;
+        let mejor = MIN;
+
+        while (bajo <= alto) {
+          const medio = Math.floor((bajo + alto) / 2);
+          elMensaje.style.fontSize = medio + "px";
+
+          const cabe =
+            elMensaje.scrollWidth <= dispAncho &&
+            elMensaje.scrollHeight <= dispAlto;
+
+          if (cabe) {
+            mejor = medio;
+            bajo = medio + 1; // intentamos uno más grande
+          } else {
+            alto = medio - 1; // nos pasamos, probamos más pequeño
+          }
+        }
+
+        elMensaje.style.fontSize = mejor + "px";
+      }
+
+      // ----------------------------------------------------------------------
+      //  Pintar el mensaje recibido.
+      // ----------------------------------------------------------------------
+      function mostrar(texto) {
+        const hayTexto = typeof texto === "string" && texto.trim() !== "";
+
+        if (hayTexto) {
+          elMensaje.textContent = texto;
+          elMensaje.classList.remove("esperando");
+          // Quitamos el tamaño en línea para recalcular desde cero.
+          elMensaje.style.fontSize = "";
+          ajustarTamano();
+        } else {
+          elMensaje.textContent = TEXTO_ESPERA;
+          elMensaje.classList.add("esperando");
+          elMensaje.style.fontSize = ""; // la clase .esperando fija el tamaño
+        }
+      }
+
+      // ----------------------------------------------------------------------
+      //  Listener en TIEMPO REAL (no polling).
+      //  onValue() se dispara con el valor inicial y con cada cambio posterior.
+      // ----------------------------------------------------------------------
+      onValue(
+        refMensaje,
+        (snap) => {
+          mostrar(snap.val());
+        },
+        (err) => {
+          console.error("Error al leer de Firebase:", err);
+        }
+      );
+
+      // Recalcular el tamaño si cambia el tamaño de la ventana / orientación.
+      window.addEventListener("resize", () => {
+        if (!elMensaje.classList.contains("esperando")) {
+          elMensaje.style.fontSize = "";
+          ajustarTamano();
+        }
+      });
+
+      // ----------------------------------------------------------------------
+      //  Botón de pantalla completa.
+      // ----------------------------------------------------------------------
+      btnFullscreen.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.();
+        } else {
+          document.exitFullscreen?.();
+        }
+      });
+    </script>
+  </body>
+</html>

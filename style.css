@@ -1,0 +1,322 @@
+/* ==========================================================================
+   Mensajero — estilos compartidos
+   Diseño minimalista y moderno, responsive (celular y laptop).
+   ========================================================================== */
+
+/* -------- Variables de tema -------- */
+:root {
+  --bg: #0f1115;
+  --bg-panel: #171a21;
+  --bg-elev: #1f232c;
+  --texto: #e8eaed;
+  --texto-suave: #9aa0aa;
+  --acento: #4f8cff;
+  --acento-hover: #3d78e8;
+  --borde: #2a2f3a;
+  --ok: #35c15f;
+  --error: #ff5c5c;
+  --radio: 14px;
+  --fuente: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+}
+
+/* -------- Reset básico -------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--fuente);
+  background: var(--bg);
+  color: var(--texto);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   Página de bienvenida (index.html)
+   ========================================================================== */
+.inicio {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.inicio__titulo {
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(120deg, var(--texto), var(--acento));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.inicio__subtitulo {
+  color: var(--texto-suave);
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  max-width: 34ch;
+  margin-top: -1.5rem;
+}
+
+.inicio__botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  justify-content: center;
+  width: 100%;
+  max-width: 640px;
+}
+
+/* Botón grande tipo tarjeta para elegir rol */
+.tarjeta-rol {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 2rem 1.5rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  color: var(--texto);
+  text-decoration: none;
+  font-size: 1.3rem;
+  font-weight: 600;
+  transition: transform 0.15s ease, border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.tarjeta-rol:hover {
+  transform: translateY(-4px);
+  border-color: var(--acento);
+  background: var(--bg-elev);
+}
+
+.tarjeta-rol__icono {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.tarjeta-rol__desc {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--texto-suave);
+}
+
+/* ==========================================================================
+   Barra superior (emisor)
+   ========================================================================== */
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--borde);
+  background: var(--bg-panel);
+}
+
+.barra__titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.barra__volver {
+  color: var(--texto-suave);
+  text-decoration: none;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.barra__volver:hover {
+  color: var(--texto);
+}
+
+/* -------- Indicador de conexión -------- */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.estado__punto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--texto-suave);
+  transition: background 0.2s ease;
+}
+
+.estado.conectado .estado__punto {
+  background: var(--ok);
+  box-shadow: 0 0 0 3px rgba(53, 193, 95, 0.2);
+}
+
+.estado.desconectado .estado__punto {
+  background: var(--error);
+  box-shadow: 0 0 0 3px rgba(255, 92, 92, 0.2);
+}
+
+/* ==========================================================================
+   Página Emisor (emisor.html)
+   ========================================================================== */
+.emisor {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.emisor__cuerpo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.emisor__textarea {
+  flex: 1;
+  min-height: 45vh;
+  width: 100%;
+  resize: vertical;
+  padding: 1.25rem;
+  font-family: inherit;
+  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  line-height: 1.4;
+  color: var(--texto);
+  background: var(--bg-panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.emisor__textarea:focus {
+  border-color: var(--acento);
+}
+
+.emisor__textarea::placeholder {
+  color: var(--texto-suave);
+}
+
+.emisor__pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.contador {
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+/* -------- Botones -------- */
+.boton {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--bg-elev);
+  color: var(--texto);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    transform 0.1s ease;
+}
+.boton:hover {
+  border-color: var(--acento);
+}
+.boton:active {
+  transform: scale(0.97);
+}
+
+.boton--peligro:hover {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+/* ==========================================================================
+   Página Receptor (receptor.html)
+   ========================================================================== */
+.receptor {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4vmin;
+  background: #000;
+  color: #fff;
+  text-align: center;
+  cursor: default;
+  overflow: hidden;
+}
+
+.receptor__texto {
+  width: 100%;
+  max-width: 95vw;
+  /* El tamaño base lo ajusta el JS; clamp() sirve de respaldo. */
+  font-size: clamp(2rem, 12vw, 16rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  transition: font-size 0.15s ease;
+}
+
+/* Estado de espera (sin mensaje) */
+.receptor__texto.esperando {
+  font-size: clamp(1rem, 4vw, 2rem) !important;
+  font-weight: 400;
+  color: #5a5a5a;
+  letter-spacing: 0;
+}
+
+/* Botón discreto de pantalla completa en el receptor */
+.receptor__fs {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+.receptor__fs:hover {
+  opacity: 1;
+}

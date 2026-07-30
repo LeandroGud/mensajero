@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mensajero</title>
+
+    <!-- Tipografía Inter desde Google Fonts (CDN) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="inicio">
+      <h1 class="inicio__titulo">Mensajero</h1>
+      <p class="inicio__subtitulo">
+        Escribe en un dispositivo y muéstralo en grande en otro, en tiempo real.
+      </p>
+
+      <div class="inicio__botones">
+        <!-- Botón / tarjeta: Emisor -->
+        <a class="tarjeta-rol" href="emisor.html">
+          <span class="tarjeta-rol__icono">✍️</span>
+          <span>Soy Emisor</span>
+          <span class="tarjeta-rol__desc">Escribo el mensaje</span>
+        </a>
+
+        <!-- Botón / tarjeta: Receptor -->
+        <a class="tarjeta-rol" href="receptor.html">
+          <span class="tarjeta-rol__icono">📺</span>
+          <span>Soy Receptor</span>
+          <span class="tarjeta-rol__desc">Muestro el mensaje</span>
+        </a>
+      </div>
+    </main>
+  </body>
+</html>
