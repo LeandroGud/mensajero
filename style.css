@@ -42,6 +42,125 @@ body {
 }
 
 /* ==========================================================================
+   Overlay de PIN (index.html, emisor.html, receptor.html)
+   ========================================================================== */
+.pin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.pin-caja {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+  max-width: 320px;
+  width: 100%;
+}
+
+.pin-caja__icono {
+  font-size: 2.8rem;
+  line-height: 1;
+}
+
+.pin-caja__titulo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.pin-caja__subtitulo {
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+  margin-top: -1rem;
+}
+
+/* Puntitos que representan los dígitos ingresados */
+.pin-puntos {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.pin-punto {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--borde);
+  background: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pin-punto.activo {
+  background: var(--acento);
+  border-color: var(--acento);
+}
+
+/* Teclado numérico */
+.pin-teclado {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.pin-tecla {
+  font-family: inherit;
+  font-size: 1.4rem;
+  font-weight: 600;
+  padding: 1rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  color: var(--texto);
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.08s ease;
+  user-select: none;
+}
+
+.pin-tecla:hover {
+  background: var(--bg-elev);
+}
+
+.pin-tecla:active {
+  transform: scale(0.93);
+  background: var(--bg-elev);
+}
+
+.pin-tecla--borrar {
+  font-size: 1rem;
+  color: var(--texto-suave);
+}
+
+/* Mensaje de error */
+.pin-error {
+  font-size: 0.85rem;
+  color: var(--error);
+  min-height: 1.2em;
+  transition: opacity 0.2s ease;
+}
+
+/* Animación de shake cuando el PIN es incorrecto */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}
+
+.pin-puntos.shake {
+  animation: shake 0.4s ease;
+}
+
+/* ==========================================================================
    Página de bienvenida (index.html)
    ========================================================================== */
 .inicio {

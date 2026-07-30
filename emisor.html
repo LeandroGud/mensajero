@@ -37,11 +37,12 @@
           id="texto"
           class="emisor__textarea"
           placeholder="Escribe aquí… se mostrará al instante en el receptor."
+          maxlength="500"
           autofocus
         ></textarea>
 
         <div class="emisor__pie">
-          <span id="contador" class="contador">0 caracteres</span>
+          <span id="contador" class="contador">0 / 500 caracteres</span>
           <button id="btnLimpiar" class="boton boton--peligro" type="button">
             Limpiar
           </button>
@@ -50,6 +51,12 @@
     </div>
 
     <!-- ================== Lógica del Emisor (Firebase v9 modular) ================== -->
+    <script>
+      // Redirige al PIN si no hay sesión activa.
+      if (sessionStorage.getItem("msg_auth") !== "1") {
+        location.replace("index.html");
+      }
+    </script>
     <script type="module">
       // Importamos el SDK de Firebase v9+ (modular) desde el CDN oficial.
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -96,15 +103,22 @@
       const DEBOUNCE_MS = 180;
       let temporizador = null;
 
+      const MAX_CHARS = 500;
+
       function actualizarContador() {
         const n = textarea.value.length;
-        contador.textContent = `${n} ${n === 1 ? "caracter" : "caracteres"}`;
+        contador.textContent = `${n} / ${MAX_CHARS} caracteres`;
+        contador.style.color = n >= MAX_CHARS ? "var(--error)" : "";
+      }
+
+      function sanitizar(texto) {
+        // Recorta al límite máximo por si alguien manipula el DOM para quitar maxlength.
+        // textContent en el receptor ya evita XSS, pero validamos también en origen.
+        return String(texto).slice(0, MAX_CHARS);
       }
 
       function subirTexto(valor) {
-        // set() sobrescribe el valor en la ruta. Si algo falla (reglas, red),
-        // lo registramos en consola sin romper la escritura del usuario.
-        set(refMensaje, valor).catch((err) => {
+        set(refMensaje, sanitizar(valor)).catch((err) => {
           console.error("Error al subir el texto a Firebase:", err);
         });
       }

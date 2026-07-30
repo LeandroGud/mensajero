@@ -29,6 +29,12 @@
     </button>
 
     <!-- ================== Lógica del Receptor (Firebase v9 modular) ================== -->
+    <script>
+      // Redirige al PIN si no hay sesión activa.
+      if (sessionStorage.getItem("msg_auth") !== "1") {
+        location.replace("index.html");
+      }
+    </script>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
       import {

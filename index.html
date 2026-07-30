@@ -5,32 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mensajero</title>
 
-    <!-- Tipografía Inter desde Google Fonts (CDN) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main class="inicio">
+    <!-- ==================== Overlay de PIN ==================== -->
+    <div id="pinOverlay" class="pin-overlay">
+      <div class="pin-caja">
+        <span class="pin-caja__icono">🔒</span>
+        <h1 class="pin-caja__titulo">Mensajero</h1>
+        <p class="pin-caja__subtitulo">Ingresa el PIN para continuar</p>
+
+        <!-- Indicador visual de dígitos -->
+        <div id="pinPuntos" class="pin-puntos">
+          <span class="pin-punto"></span>
+          <span class="pin-punto"></span>
+          <span class="pin-punto"></span>
+          <span class="pin-punto"></span>
+        </div>
+
+        <p id="pinError" class="pin-error"></p>
+
+        <!-- Teclado numérico -->
+        <div class="pin-teclado">
+          <button class="pin-tecla" data-n="1">1</button>
+          <button class="pin-tecla" data-n="2">2</button>
+          <button class="pin-tecla" data-n="3">3</button>
+          <button class="pin-tecla" data-n="4">4</button>
+          <button class="pin-tecla" data-n="5">5</button>
+          <button class="pin-tecla" data-n="6">6</button>
+          <button class="pin-tecla" data-n="7">7</button>
+          <button class="pin-tecla" data-n="8">8</button>
+          <button class="pin-tecla" data-n="9">9</button>
+          <span></span><!-- celda vacía para centrar el 0 -->
+          <button class="pin-tecla" data-n="0">0</button>
+          <button class="pin-tecla pin-tecla--borrar" id="pinBorrar">⌫</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== Contenido principal (oculto hasta PIN correcto) ==================== -->
+    <main id="contenidoPrincipal" class="inicio" style="display:none">
       <h1 class="inicio__titulo">Mensajero</h1>
       <p class="inicio__subtitulo">
         Escribe en un dispositivo y muéstralo en grande en otro, en tiempo real.
       </p>
 
       <div class="inicio__botones">
-        <!-- Botón / tarjeta: Emisor -->
         <a class="tarjeta-rol" href="emisor.html">
           <span class="tarjeta-rol__icono">✍️</span>
           <span>Soy Emisor</span>
           <span class="tarjeta-rol__desc">Escribo el mensaje</span>
         </a>
 
-        <!-- Botón / tarjeta: Receptor -->
         <a class="tarjeta-rol" href="receptor.html">
           <span class="tarjeta-rol__icono">📺</span>
           <span>Soy Receptor</span>
@@ -38,5 +70,100 @@
         </a>
       </div>
     </main>
+
+    <script>
+      // -----------------------------------------------------------------------
+      //  PIN de acceso
+      //  Se guarda en sessionStorage para que no pida el PIN en cada página
+      //  dentro de la misma sesión del navegador, pero sí al abrir una
+      //  nueva pestaña/ventana.
+      //
+      //  Nota de seguridad: en una app 100% estática el PIN vive en el código
+      //  fuente y cualquiera que inspeccione el JS lo puede ver. Esta barrera
+      //  detiene el acceso casual, no a alguien determinado a saltársela.
+      // -----------------------------------------------------------------------
+
+      // Hash SHA-256 del PIN "6927" generado offline.
+      // Para cambiarlo: SHA-256("nuevo_pin") y reemplaza este valor.
+      const PIN_HASH = "e04b14da018be71fa605fa5c8b38a8db00836c4bd09bcedb225ce071b36f98f3";
+
+      // Función de hash SHA-256 usando la Web Crypto API nativa (sin librerías).
+      async function sha256(texto) {
+        const datos = new TextEncoder().encode(texto);
+        const buffer = await crypto.subtle.digest("SHA-256", datos);
+        return Array.from(new Uint8Array(buffer))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
+
+      const overlay   = document.getElementById("pinOverlay");
+      const contenido = document.getElementById("contenidoPrincipal");
+      const puntos    = document.querySelectorAll(".pin-punto");
+      const errorEl   = document.getElementById("pinError");
+      const borrarBtn = document.getElementById("pinBorrar");
+
+      let entrada = "";
+      const LONGITUD = 4;
+
+      // Si ya autenticó en esta sesión, mostramos directamente el contenido.
+      if (sessionStorage.getItem("msg_auth") === "1") {
+        overlay.style.display = "none";
+        contenido.style.display = "";
+      }
+
+      function actualizarPuntos() {
+        puntos.forEach((p, i) => {
+          p.classList.toggle("activo", i < entrada.length);
+        });
+      }
+
+      async function verificarPin() {
+        const hash = await sha256(entrada);
+        if (hash === PIN_HASH) {
+          sessionStorage.setItem("msg_auth", "1");
+          overlay.style.display = "none";
+          contenido.style.display = "";
+        } else {
+          // Sacudimos los puntos y mostramos error.
+          const puntosEl = document.getElementById("pinPuntos");
+          puntosEl.classList.add("shake");
+          setTimeout(() => puntosEl.classList.remove("shake"), 450);
+          errorEl.textContent = "PIN incorrecto. Intenta de nuevo.";
+          entrada = "";
+          actualizarPuntos();
+        }
+      }
+
+      function agregarDigito(d) {
+        if (entrada.length >= LONGITUD) return;
+        errorEl.textContent = "";
+        entrada += d;
+        actualizarPuntos();
+        if (entrada.length === LONGITUD) verificarPin();
+      }
+
+      // Teclado virtual
+      document.querySelectorAll(".pin-tecla[data-n]").forEach((btn) => {
+        btn.addEventListener("click", () => agregarDigito(btn.dataset.n));
+      });
+
+      // Borrar último dígito
+      borrarBtn.addEventListener("click", () => {
+        entrada = entrada.slice(0, -1);
+        errorEl.textContent = "";
+        actualizarPuntos();
+      });
+
+      // Teclado físico (para comodidad en desktop)
+      document.addEventListener("keydown", (e) => {
+        if (overlay.style.display === "none") return;
+        if (/^[0-9]$/.test(e.key)) agregarDigito(e.key);
+        if (e.key === "Backspace") {
+          entrada = entrada.slice(0, -1);
+          errorEl.textContent = "";
+          actualizarPuntos();
+        }
+      });
+    </script>
   </body>
 </html>
